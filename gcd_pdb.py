@@ -1,12 +1,12 @@
-from __future__ import division
-from six.moves import range
+# gcd_pdb: tool for comparing the parts in common (gcd = greatest common
+# denominator) among two or more pdb files.
+# Author: Iris Young
+# Modified: 2021.12.03
 
 from pdb_parsing_tools import *
-#from cxi_xdr_xes.util_iris.pdb_parsing_tools import *
 from collections import OrderedDict
 import sys
 from residues_util import residues, solvent_molecules, metal_ions
-#from cxi_xdr_xes.util_iris.residues_util import residues, solvent_molecules, metal_ions
 
 debug = False
 
@@ -22,7 +22,7 @@ def redirect_print(print_process, args, target=None):
 
 def read_pdb(pdb):
   if debug:
-    print "ATTEMPTING TO READ A PDB"
+    print("ATTEMPTING TO READ A PDB")
   header = []
   parsed = []
   ligand = []
@@ -62,13 +62,13 @@ def read_pdb(pdb):
         break
     b_scale = b_total / n_atoms
   if debug:
-    print "READ A PDB"
+    print("READ A PDB")
   return header, parsed, ligand, solvent, ions, b_scale
 
 class hierarchical_pdb(object):
   def __init__(self, parsed_pdb_and_header):
     if debug:
-      print "ATTEMPTING TO ASSEMBLE A PDB OBJECT"
+      print("ATTEMPTING TO ASSEMBLE A PDB OBJECT")
     self.header = parsed_pdb_and_header[0]
     self.parsed_pdb = parsed_pdb_and_header[1]
     self.ligand = parsed_pdb_and_header[2]
@@ -82,16 +82,16 @@ class hierarchical_pdb(object):
     # self.atoms_sets = dict()
     # self.records_by_atom = dict()
     if debug:
-      print "...SORTING CHAINS"
+      print("...SORTING CHAINS")
     self.get_chains()
     if debug:
-      print "...SORTING RESIDUES"
+      print("...SORTING RESIDUES")
     self.get_residues()
     if debug:
-      print "...SORTING ATOMS"
+      print("...SORTING ATOMS")
     self.get_atoms()
     if debug:
-      print "DONE"
+      print("DONE")
   def get_chains(self):
     self.records_by_chain = OrderedDict()
     self.chain_set = set()
@@ -133,7 +133,7 @@ class hierarchical_pdb(object):
             self.atoms_sets[chain][residue].add(record['atom'])
   def write_chain(self, chain, outfile):
     for record in self.header:
-      print record[:-2]
+      print(record[:-2])
       record_number = 0
     with open(outfile, "wb") as out:
       for residue in self.records_by_residue[chain].keys():
@@ -148,43 +148,43 @@ class hierarchical_pdb(object):
              record['xyz'][0], record['xyz'][1], record['xyz'][2], record['occ'], record['b'], record['elem']))
   def write_header(self, open_outfile):
     if debug:
-      print "ATTEMPTING TO WRITE HEADER ONLY TO OPEN FILE"
+      print("ATTEMPTING TO WRITE HEADER ONLY TO OPEN FILE")
     for record in self.header:
       open_outfile.write(record[:-2])
   def print_pdb(self):
     if debug:
-      print "ATTEMPTING TO PRINT HIERARCHICAL PDB"
+      print("ATTEMPTING TO PRINT HIERARCHICAL PDB")
     for record in self.header:
-      print record[:-2]
+      print(record[:-2])
     record_number = 0
     for chain in self.records_by_chain.keys():
       if debug:
-        print 10*"_"
-        print "CHAIN " + chain
+        print(10*"_")
+        print("CHAIN " + chain)
       for residue in self.records_by_residue[chain].keys():
         if debug:
-          print 10*"_"
-          print "RESIDUE " + residue
+          print(10*"_")
+          print("RESIDUE " + residue)
         # for record_idx in self.records_by_residue[chain][residue]:
         for atom in self.records_by_atom[chain][residue].keys():
           record_idx = self.records_by_atom[chain][residue][atom][0]
           record = self.parsed_pdb[record_idx]
           record_number += 1
           record_num_str = get_record_num_str(None, record_number)
-          print """ATOM  %5s %4s % 3s %-2s% 4s   % 8.3f% 8.3f% 8.3f % 4.2f %5.2f          % 2s""" % \
+          print("""ATOM  %5s %4s % 3s %-2s% 4s   % 8.3f% 8.3f% 8.3f % 4.2f %5.2f          % 2s""" % \
             (record_num_str, record['atom'], record['resname'], record['chain'], record['resid'],
-              record['xyz'][0], record['xyz'][1], record['xyz'][2], record['occ'], record['b'], record['elem'])
+              record['xyz'][0], record['xyz'][1], record['xyz'][2], record['occ'], record['b'], record['elem']))
     for record in self.ligand:
       record_number += 1
       record_num_str = get_record_num_str(None, record_number)
-      print """ATOM  %5s %4s % 3s %-2s% 4s   % 8.3f% 8.3f% 8.3f % 4.2f %5.2f          % 2s""" % \
+      print("""ATOM  %5s %4s % 3s %-2s% 4s   % 8.3f% 8.3f% 8.3f % 4.2f %5.2f          % 2s""" % \
         (record_num_str, record['atom'], record['resname'], record['chain'], record['resid'],
-          record['xyz'][0], record['xyz'][1], record['xyz'][2], record['occ'], record['b'], record['elem'])
+          record['xyz'][0], record['xyz'][1], record['xyz'][2], record['occ'], record['b'], record['elem']))
     if debug:
-      print "END OF HIERARCHICAL PDB"
+      print("END OF HIERARCHICAL PDB")
   def get_pdb_summary(self):
     if debug:
-      print "ATTEMPTING TO COMPILE PDB SUMMARY"
+      print("ATTEMPTING TO COMPILE PDB SUMMARY")
     summary = {}
     for chain in self.records_by_chain.keys():
       current = []
@@ -193,7 +193,7 @@ class hierarchical_pdb(object):
       summary[chain] = current
     if debug:
       for chain in summary.keys():
-        print " ".join(summary[chain]) # e.g. A 12 ASN 13 LEU 14 TRP 15 GLU 16 ARG...
+        print(" ".join(summary[chain]))# e.g. A 12 ASN 13 LEU 14 TRP 15 GLU 16 ARG...
 
 class selection_pdb(hierarchical_pdb):
   def __init__(self, hierarchical_pdb, selection_condition):
@@ -220,11 +220,11 @@ class gcd_pdb(hierarchical_pdb):
     elif len(hierarchical_pdb_list) == 1:
       self.pdb_list = []
       if debug:
-        print "TAKING GCD OF ONLY ONE PDB"
+        print("TAKING GCD OF ONLY ONE PDB")
     else:
       self.pdb_list = hierarchical_pdb_list[1:]
       if debug:
-        print "ATTEMPTING TO TRIM PDB"
+        print("ATTEMPTING TO TRIM PDB")
     pdb0 = hierarchical_pdb_list[0]
     self.header = pdb0.header
     self.parsed_pdb = pdb0.parsed_pdb
@@ -237,16 +237,16 @@ class gcd_pdb(hierarchical_pdb):
     self.atoms_sets = pdb0.atoms_sets
     self.records_by_atom = pdb0.records_by_atom
     if debug:
-      print "...SORTING CHAINS"
+      print("...SORTING CHAINS")
     self.get_chains()
     if debug:
-      print "...SORTING RESIDUES"
+      print("...SORTING RESIDUES")
     self.get_residues()
     if debug:
-      print "...SORTING ATOMS"
+      print("...SORTING ATOMS")
     self.get_atoms()
     if debug:
-      print "DONE"
+      print("DONE")
   def get_chains(self):
     for pdb in self.pdb_list:
       self.chain_set = self.chain_set.intersection(pdb.chain_set)
@@ -272,36 +272,36 @@ class gcd_pdb(hierarchical_pdb):
                                 for chain in self.records_by_chain.keys())
   def print_with_cla_hem_pheo_oex(self):
     if debug:
-      print "ATTEMPTING TO PRINT HIERARCHICAL PDB"
+      print("ATTEMPTING TO PRINT HIERARCHICAL PDB")
     for record in self.header:
-      print record[:-2]
+      print(record[:-2])
     record_number = 0
     for chain in self.records_by_chain.keys():
       if debug:
-        print 10*"_"
-        print "CHAIN " + chain
+        print(10*"_")
+        print("CHAIN " + chain)
       for residue in self.records_by_residue[chain].keys():
         if debug:
-          print 10*"_"
-          print "RESIDUE " + residue
+          print(10*"_")
+          print("RESIDUE " + residue)
         for record_idx in self.records_by_residue[chain][residue]:
           record = self.parsed_pdb[record_idx]
           record_number += 1
           record_num_str = get_record_num_str(None, record_number)
-          print """ATOM  %5s %4s % 3s %-2s% 4s   % 8.3f% 8.3f% 8.3f % 4.2f %5.2f          % 2s""" % \
+          print("""ATOM  %5s %4s % 3s %-2s% 4s   % 8.3f% 8.3f% 8.3f % 4.2f %5.2f          % 2s""" % \
             (record_num_str, record['atom'], record['resname'], record['chain'], record['resid'],
-              record['xyz'][0], record['xyz'][1], record['xyz'][2], record['occ'], record['b'], record['elem'])
+              record['xyz'][0], record['xyz'][1], record['xyz'][2], record['occ'], record['b'], record['elem']))
     if debug:
-      print 10*"_"
-      print "CHLOROPHYLLS, HEMES, PHEOPHYTINS AND OECS"
+      print(10*"_")
+      print("CHLOROPHYLLS, HEMES, PHEOPHYTINS AND OECS")
     for record in self.ligand:
       record_number += 1
       record_num_str = get_record_num_str(None, record_number)
-      print """ATOM  %5s %4s % 3s %-2s% 4s   % 8.3f% 8.3f% 8.3f % 4.2f %5.2f          % 2s""" % \
+      print("""ATOM  %5s %4s % 3s %-2s% 4s   % 8.3f% 8.3f% 8.3f % 4.2f %5.2f          % 2s""" % \
         (record_num_str, record['atom'], record['resname'], record['chain'], record['resid'],
-          record['xyz'][0], record['xyz'][1], record['xyz'][2], record['occ'], record['b'], record['elem'])
+          record['xyz'][0], record['xyz'][1], record['xyz'][2], record['occ'], record['b'], record['elem']))
     if debug:
-      print "END OF HIERARCHICAL PDB"
+      print("END OF HIERARCHICAL PDB")
 
 class gcd_pdb_diffb(gcd_pdb):
   def __init__(self, gcd_pdb_list):
@@ -332,13 +332,13 @@ class gcd_pdb_diffb(gcd_pdb):
   def print_diff_b_factor_pdb(self):
     record_number = 0
     for record in self.header:
-      print record[:-2]
+      print(record[:-2])
     for record in self.diff_b_pdb:
       record_number += 1
       record_num_str = get_record_num_str(None, record_number)
-      print """ATOM  %5s %4s % 3s %-2s% 4s   % 8.3f% 8.3f% 8.3f % 4.2f %5.2f          % 2s""" % \
+      print("""ATOM  %5s %4s % 3s %-2s% 4s   % 8.3f% 8.3f% 8.3f % 4.2f %5.2f          % 2s""" % \
         (record_num_str, record['atom'], record['resname'], record['chain'], record['resid'],
-          record['xyz'][0], record['xyz'][1], record['xyz'][2], record['occ'], record['b'], record['elem'])
+          record['xyz'][0], record['xyz'][1], record['xyz'][2], record['occ'], record['b'], record['elem']))
 
 def gcd_pdb1_pdb2(pdb1, pdb2, ligands=False, outname=None, outname2=None):
   hier_pdb1 = hierarchical_pdb(read_pdb(pdb1))

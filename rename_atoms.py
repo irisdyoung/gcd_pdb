@@ -21,11 +21,11 @@ def rename_atoms_of_selected_residue(
   match_indices = [row.index(min(row)) for row in distance_matrix]
   records_match = [records_start[i] for i in match_indices]
   lookup = {}
-  for i in xrange(len(records_match)):
+  for i in range(len(records_match)):
     rtarget = records_target[i]
     rmatch = records_match[i]
     lookup[rmatch['atom']] = rtarget['atom']
-    print 'replacing all instances of %s with %s' % (rmatch['atom'], rtarget['atom'])
+    print('replacing all instances of %s with %s' % (rmatch['atom'], rtarget['atom']))
   def update_record(record):
     new_atom = lookup[get_atom(record)]
     new_record = record[:12] + ("% 4s" % new_atom) + record[16:]
@@ -39,8 +39,8 @@ def rename_atoms_of_selected_residue(
           count += 1
         else:
           newfile.write(record)
-      print 'updated %i atom names' % count
-      print 'updated file written to %s' % newfilename
+      print('updated %i atom names' % count)
+      print('updated file written to %s' % newfilename)
 
 if __name__ == "__main__":
   import sys

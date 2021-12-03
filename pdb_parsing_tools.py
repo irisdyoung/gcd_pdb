@@ -1,4 +1,3 @@
-from __future__ import division
 from hybrid_36 import hy36encode, hy36decode
 
 # reading pdbs:

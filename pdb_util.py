@@ -2,16 +2,15 @@
 #
 # gcd_pdb_cmd.py
 #
-from __future__ import division
-from six.moves import range
-# from libtbx.utils import Sorry
 from pdb_parsing_tools import *
 from gcd_pdb import read_pdb, hierarchical_pdb
 from residues_util import modified_all
 
 def phenix_fetch(pdbid):
+  import asyncio # not tested with this yet
   assert pdbid.isalnum() and len(pdbid) == 4
-  easy_run.fully_buffered(command = "phenix.fetch_pdb " + pdbid).raise_if_errors()
+  process = asyncio.create_subprocess_shell("phenix.fetch_pdb " + pdbid)
+  process()
   return pdbid + ".pdb"
 
 def print_ligand_list(pdb):
@@ -31,9 +30,9 @@ def print_ligand_list(pdb):
       lig_count[l.split("_")[0]] = 1
   total_ligand_count = 0
   for l in lig_count:
-    print l, lig_count[l]
+    print(l, lig_count[l])
     total_ligand_count += lig_count[l]
-  print "total ligands:", total_ligand_count
+  print("total ligands:", total_ligand_count)
 
 def filter_conf(old_filename, new_filename, conformer, remove=True):
   if remove:
@@ -208,7 +207,7 @@ def put_centers(pdb):
 
 def get_interatomic_distance(xyz1, xyz2):
   import math
-  diffs_sq = [(xyz2[i] - xyz1[i])**2 for i in xrange(3)]
+  diffs_sq = [(xyz2[i] - xyz1[i])**2 for i in range(3)]
   distance = math.sqrt(sum(diffs_sq))
   return distance
 
@@ -233,8 +232,8 @@ def get_closest_waters(pdb, chain=None, resname=None, resid=None, atom=None,
         this_distance = get_interatomic_distance(position, target_position)
         if this_distance <= distance:
           return this_distance
-  print "Finding waters within %4.2f Angstroms of target %s" % (distance,
-    " ".join([i for i in (chain, resname, resid, atom) if i is not None]))
+  print("Finding waters within %4.2f Angstroms of target %s" % (distance,
+    " ".join([i for i in (chain, resname, resid, atom) if i is not None])))
   model = open(pdb, "rb")
   for record in model:
     if match_target(record):
@@ -249,22 +248,22 @@ def get_closest_waters(pdb, chain=None, resname=None, resid=None, atom=None,
                                 str(get_resid(record)),
                                 get_atom(record))
   dists_available = sorted(waters_distances.keys())
-  for i in xrange(min(max_waters, len(dists_available))):
+  for i in range(min(max_waters, len(dists_available))):
     d = dists_available[i]
     w = waters_distances[d]
     del waters_distances[d]
     waters.append(w)
-    print " ".join(w)
+    print(" ".join(w))
   return waters
 
 def get_pdb_stats(pdb):
   hier = hierarchical_pdb(read_pdb(pdb))
   resis = set([d['resname'] for d in hier.parsed_pdb])
-  print "modified residues:"
+  print("modified residues:")
   mods = set([" ".join([rec['chain'],str(rec['resid']),rec['resname']])
     for rec in hier.parsed_pdb if rec['resname'] in modified_all])
-  print "\n".join(sorted(mods))
-  print "\n"
+  print("\n".join(sorted(mods)))
+  print("\n")
   # chains with protein residues in them
   num_ch = len(hier.chain_set)
   # protein residues and atoms
@@ -305,30 +304,30 @@ def get_pdb_stats(pdb):
     avg_B = total_B_prot / num_prot_atoms
   except ZeroDivisionError:
     avg_B = 0
-  print "Number of chains:", num_ch
-  print
-  print "Number of protein residues:", num_prot
-  print "Number of protein atoms:", num_prot_atoms
-  print "Number of non-H protein atoms:", num_prot_non_H
-  print
-  print "Number of ions:", num_ions
-  print
-  print "Number of ligands:", num_lig
-  print "Number of ligand atoms:", num_lig_atoms
-  print "Number of non-H ligand atoms:", num_lig_non_H
-  print
-  print "Number of solvent molecules:", num_solv
-  print "Number of solvent atoms:", num_solv_atoms
-  print "Number of non-H solvent atoms:", num_solv_non_H
-  print
-  print "Number of water molecules:", num_wat
-  print "Numebr of water atoms:", num_wat_atoms
-  print "Number of non-H water atoms:", num_wat_non_H
-  print
-  print "Number of total atoms:", num_prot_atoms + num_lig_atoms + num_solv_atoms
-  print "Number of non-H atoms:", num_prot_non_H + num_lig_non_H + num_solv_non_H
-  print "Average B-factor: %5.2f" % avg_B
-  print
+  print("Number of chains:", num_ch)
+  print()
+  print("Number of protein residues:", num_prot)
+  print("Number of protein atoms:", num_prot_atoms)
+  print("Number of non-H protein atoms:", num_prot_non_H)
+  print()
+  print("Number of ions:", num_ions)
+  print()
+  print("Number of ligands:", num_lig)
+  print("Number of ligand atoms:", num_lig_atoms)
+  print("Number of non-H ligand atoms:", num_lig_non_H)
+  print()
+  print("Number of solvent molecules:", num_solv)
+  print("Number of solvent atoms:", num_solv_atoms)
+  print("Number of non-H solvent atoms:", num_solv_non_H)
+  print()
+  print("Number of water molecules:", num_wat)
+  print("Numebr of water atoms:", num_wat_atoms)
+  print("Number of non-H water atoms:", num_wat_non_H)
+  print()
+  print("Number of total atoms:", num_prot_atoms + num_lig_atoms + num_solv_atoms)
+  print("Number of non-H atoms:", num_prot_non_H + num_lig_non_H + num_solv_non_H)
+  print("Average B-factor: %5.2f" % avg_B)
+  print()
 
 def get_chains(pdb, monomer="both", exclude_chains=""):
   if monomer == "both":
@@ -360,11 +359,11 @@ if __name__ == "__main__":
     if len(sys.argv) == 3:
       print_ligand_list(sys.argv[2])
     else:
-      print "Usage: print_ligand_list model.pdb"
+      print("Usage: print_ligand_list model.pdb")
   elif sys.argv[1] == "get_pdb_stats":
     if len(sys.argv) == 3:
       get_pdb_stats(sys.argv[2])
     else:
-      print "Usage: get_pdb_stats model.pdb"
+      print("Usage: get_pdb_stats model.pdb")
   else:
-    print "Usage: command *args"
+    print("Usage: command *args")

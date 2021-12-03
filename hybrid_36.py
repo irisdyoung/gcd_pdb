@@ -82,12 +82,12 @@ See also:
 
 Ralf W. Grosse-Kunstleve, Feb 2007.
 """
-from __future__ import absolute_import, division, print_function
-try:
-  from six.moves import range
-  from six.moves import zip
-except ImportError:
-  pass
+# from __future__ import absolute_import, division, print_function
+# try:
+#   from six.moves import range
+#   from six.moves import zip
+# except ImportError:
+#   pass
 
 digits_upper = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 digits_lower = digits_upper.lower()

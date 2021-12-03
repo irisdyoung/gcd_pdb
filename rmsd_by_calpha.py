@@ -1,7 +1,4 @@
-from __future__ import division
-from six.moves import range
-
-from libtbx import easy_run
+import asyncio
 from gcd_pdb import gcd_pdb1_pdb2
 import os
 
@@ -33,7 +30,7 @@ def rmsd_by_calpha(pdb1, pdb2, sele_fixed=None, sele_moving=None, name1=None, na
   command = "phenix.superpose_pdbs %s %s " % (pdb1, pdb2) \
   + "selection_fixed=\"%s\" selection_moving=\"%s\" " % (sele_fixed, sele_moving) \
   + "> superpose_%s_%s.log" % (name1, name2)
-  easy_run.fully_buffered(command=command).raise_if_errors()
+  asyncio.subprocess.create_subprocess_shell(command=command)()
   return_string = "Superposition of %s %s with %s %s:\n" % (name1, sele_fixed, name2, sele_moving)
   with open("superpose_%s_%s.log" % (name1, name2), "rb") as log:
     for line in log:
@@ -45,29 +42,29 @@ def rmsd_by_calpha(pdb1, pdb2, sele_fixed=None, sele_moving=None, name1=None, na
 
 def rmsd_by_calpha_vs_Suga(pdbs, names):
   with open("rmsd_by_calpha.out", "wb") as out:
-    easy_run.fully_buffered(command = "phenix.fetch_pdb 4UB6").raise_if_errors()
-    easy_run.fully_buffered(command = "phenix.fetch_pdb 4UB8").raise_if_errors()
+    asyncio.subprocess.create_subprocess_shell(command = "phenix.fetch_pdb 4UB6")()
+    asyncio.subprocess.create_subprocess_shell(command = "phenix.fetch_pdb 4UB8")()
     for idx in range(len(pdbs)):
       pdb = pdbs[idx]
       name = names[idx]
       for suga in "4UB6.pdb", "4UB8.pdb":
         gcd_pdb1_pdb2(pdb, suga, ligands=False, outname="gcd_refined.pdb")
         gcd_pdb1_pdb2(suga, pdb, ligands=False, outname="gcd_suga.pdb")
-        print "Calculating rmsd of %s with %s (full dimer)" % (name, suga.split(".pdb")[0])
+        print("Calculating rmsd of %s with %s (full dimer)" % (name, suga.split(".pdb")[0]))
         return_string = rmsd_by_calpha("gcd_refined.pdb", "gcd_suga.pdb", name1=name, name2=suga.split(".pdb")[0])
-        print return_string
+        print(return_string)
         out.write(return_string)
         for chain in get_chains("gcd_refined.pdb"):
-          print "Calculating rmsd of %s with %s (chain %s)" % (name, suga.split(".pdb")[0], chain)
+          print("Calculating rmsd of %s with %s (chain %s)" % (name, suga.split(".pdb")[0], chain))
           return_string = rmsd_by_calpha("gcd_refined.pdb", "gcd_suga.pdb",
                           sele_fixed="chain %s" % chain, sele_moving="chain %s" % chain,
                           name1=name, name2=suga.split(".pdb")[0])
-          print return_string
+          print(return_string)
           out.write(return_string)
   os.remove("gcd_suga.pdb_fitted.pdb")
   os.remove("gcd_refined.pdb")
   os.remove("gcd_suga.pdb")
-  print "rmsd results written to rmsd_by_calpha.out"
+  print("rmsd results written to rmsd_by_calpha.out")
 
 if __name__ == "__main__":
   import sys
@@ -79,5 +76,5 @@ if __name__ == "__main__":
   else:
     names = map(lambda name: name.split(".pdb")[0], pdb_list)
     pdbs = pdb_list
-  print "Generating rmsds for %d models against Suga models" % len(pdbs)
+  print("Generating rmsds for %d models against Suga models" % len(pdbs))
   rmsd_by_calpha_vs_Suga(pdbs, names)

@@ -1,9 +1,7 @@
-from __future__ import division
-import math
-
 # use gcd_pdb to represent models hierarchically and select elements in common
 from gcd_pdb import hierarchical_pdb, gcd_pdb1_pdb2
 from pdb_parsing_tools import get_record_from_record_dict, write_record_with_B
+import math
 
 def mean(list_of_values):
   return sum(list_of_values)/len(list_of_values)
@@ -51,7 +49,7 @@ def visualize_shifts(hier_pdb1, hier_pdb2, out_filename):
             record_number += 1
             record = get_record_from_record_dict(hier_pdb1.parsed_pdb[record_idx], record_number)
             out_pdb.write(write_record_with_B(record, shift))
-  print "shifts written to B factor column of", out_filename
+  print("shifts written to B factor column of", out_filename)
 
 if __name__ == "__main__":
   import sys
